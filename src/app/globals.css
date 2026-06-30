@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design tokens ──────────────────────────────── */
+:root {
+  --color-void:   #050508;
+  --color-star:   #cce4ff;
+  --color-text:   #e8eaf0;
+  --color-muted:  #4a4d60;
+  --color-accent: #3a6a9a;
+  --font-body: "Roboto", "Noto Sans KR", system-ui, sans-serif;
+  --font-display: var(--font-body);
+  --font-korean: "Noto Sans KR", system-ui, sans-serif;
+}
+
+/* ─── Base reset ─────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: var(--color-void);
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  /* Prevent sub-pixel text rendering shifts (reduces CLS) */
+  text-rendering: optimizeLegibility;
+}
+
+::-webkit-scrollbar { width: 0; }
+
+/* ─── Reduced motion ─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration:       0.01ms !important;
+    animation-iteration-count: 1     !important;
+    transition-duration:      0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Utilities ──────────────────────────────────── */
+.glass {
+  background:            rgba(255, 255, 255, 0.04);
+  backdrop-filter:       blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glow-text {
+  text-shadow: 0 0 40px rgba(100, 160, 220, 0.30);
+}
+
+/* Block display on canvas to remove descender gap (prevents CLS) */
+canvas { display: block; }
+
+/* ─── Earth image ────────────────────────────────── */
+/*
+ * Two animations at different durations ensure the motion
+ * never feels repetitive: float=9s, breathe=14s (LCM=126s).
+ * filter does not trigger layout — GPU compositor only.
+ */
+.earth-img {
+  filter:
+    drop-shadow(0 0 50px  rgba(30, 90, 200, 0.38))
+    drop-shadow(0 0 120px rgba(15, 55, 150, 0.20))
+    brightness(0.87)
+    contrast(1.05);
+  animation:
+    earthFloat   9s ease-in-out infinite,
+    earthBreathe 14s ease-in-out infinite;
+  will-change: transform;  /* only transform changes in keyframes */
+}
+
+@keyframes earthFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+
+@keyframes earthBreathe {
+  0%, 100% { transform: scale(1.000); }
+  50%       { transform: scale(1.012); }
+}
+
+/* ─── Navigation menu button pulses ─────────────── */
+@keyframes menuPing {
+  0%   { box-shadow: 0 0 0 0px rgba(255,255,255,0.20); }
+  65%  { box-shadow: 0 0 0 10px rgba(255,255,255,0);   }
+  100% { box-shadow: 0 0 0 0px rgba(255,255,255,0);   }
+}
+@keyframes menuNotify {
+  0%   { box-shadow: 0 0 0 0px rgba(80,165,255,0.55); }
+  65%  { box-shadow: 0 0 0 13px rgba(80,165,255,0);   }
+  100% { box-shadow: 0 0 0 0px rgba(80,165,255,0);   }
+}
+.animate-menu-ping    { animation: menuPing    2.8s ease-out 1.2s infinite; border-radius: 4px; }
+.animate-menu-notify  { animation: menuNotify  2.0s ease-out     infinite; border-radius: 4px; }
+
+/* ─── Tabular nums ───────────────────────────────── */
+@layer utilities {
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+}

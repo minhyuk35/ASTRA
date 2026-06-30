@@ -1,0 +1,404 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─── NextAuth required tables ──────────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ─── User ──────────────────────────────────────────────────────────────────
+
+model User {
+  id            String       @id @default(cuid())
+  name          String?
+  email         String?      @unique
+  emailVerified DateTime?
+  image         String?
+
+  nickname      String?      @unique
+  handle        String?      @unique
+  bio           String?
+  avatarColor   String       @default("rgba(80,165,255,0.30)")
+  bannerColor   String       @default("#0d1528")
+  role          UserRole     @default(USER)
+  managerScope  AnnCategory?
+  points        Int          @default(0)
+  createdAt     DateTime     @default(now())
+
+  accounts      Account[]
+  sessions      Session[]
+  guild         GuildMember?
+  posts         Post[]
+  postLikes     PostLike[]
+  comments      Comment[]
+  sentMessages  Message[]         @relation("SentMessages")
+  recvMessages  Message[]         @relation("RecvMessages")
+  attendances             Attendance[]
+  robloxLink              RobloxLink?
+  guildChats              GuildChatMessage[]
+  spaceNotes              SpaceNote[]
+  inventories             UserInventory[]
+  sentProfileMessages     ProfileMessage[] @relation("PMAuthor")
+  receivedProfileMessages ProfileMessage[] @relation("PMTarget")
+  annReplies              AnnCommentReply[] @relation("ManagerReplies")
+  badges                  UserBadge[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  USER
+}
+
+// ─── Guild ─────────────────────────────────────────────────────────────────
+
+model Guild {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  slug        String        @unique
+  description String?
+  bannerColor String        @default("#0d1528")
+  level       Int           @default(1)
+  xp          Int           @default(0)
+  xpMax       Int           @default(1000)
+  capacity    Int           @default(20)
+  createdAt   DateTime      @default(now())
+
+  members      GuildMember[]
+  chatMessages GuildChatMessage[]
+
+  @@map("guilds")
+}
+
+model GuildMember {
+  id       String    @id @default(cuid())
+  userId   String    @unique
+  guildId  String
+  role     GuildRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@map("guild_members")
+}
+
+enum GuildRole {
+  LEADER
+  SUBLEADER
+  MEMBER
+}
+
+// ─── Board ─────────────────────────────────────────────────────────────────
+
+model Post {
+  id        String       @id @default(cuid())
+  category  PostCategory @default(FREE)
+  title     String
+  content   String       @db.Text
+  authorId  String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  author   User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes    PostLike[]
+  comments Comment[]
+
+  @@map("posts")
+}
+
+enum PostCategory {
+  FREE
+  QUESTION
+  NOTICE
+  REVIEW
+}
+
+model PostLike {
+  userId String
+  postId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([userId, postId])
+  @@map("post_likes")
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  authorId  String
+  postId    String
+  parentId  String?
+  createdAt DateTime  @default(now())
+
+  author  User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies Comment[] @relation("CommentReplies")
+
+  @@map("comments")
+}
+
+// ─── Announcements ─────────────────────────────────────────────────────────
+
+model Announcement {
+  id         String      @id @default(cuid())
+  category   AnnCategory @default(NOTICE)
+  title      String
+  summary    String
+  content    String      @db.Text
+  pinned     Boolean     @default(false)
+  authorName String      @default("SIGN 운영팀")
+  startsAt   DateTime?
+  endsAt     DateTime?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  annComments AnnComment[]
+
+  @@map("announcements")
+}
+
+enum AnnCategory {
+  NOTICE
+  EVENT
+  UPDATE
+}
+
+// ─── Announcement Comments ─────────────────────────────────────────────────
+
+model AnnComment {
+  id             String   @id @default(cuid())
+  announcementId String
+  content        String   @db.VarChar(500)
+  authorNick     String   @db.VarChar(30)
+  createdAt      DateTime @default(now())
+
+  announcement Announcement    @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  replies      AnnCommentReply[]
+
+  @@map("ann_comments")
+}
+
+model AnnCommentReply {
+  id        String   @id @default(cuid())
+  commentId String
+  adminId   String?
+  label     String
+  content   String   @db.VarChar(500)
+  createdAt DateTime @default(now())
+
+  comment AnnComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  admin   User?      @relation("ManagerReplies", fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@map("ann_comment_replies")
+}
+
+// ─── Messenger ─────────────────────────────────────────────────────────────
+
+model Message {
+  id             String      @id @default(cuid())
+  type           MessageType
+  title          String
+  preview        String
+  senderId       String?
+  recipientId    String
+  guildId        String?
+  announcementId String?
+  read           Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+
+  sender    User?  @relation("SentMessages", fields: [senderId], references: [id], onDelete: SetNull)
+  recipient User   @relation("RecvMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+enum MessageType {
+  ANNOUNCEMENT
+  GUILD_INVITATION
+  JOIN_REQUEST
+  SYSTEM
+}
+
+// ─── MoneyLab ──────────────────────────────────────────────────────────────
+
+model SGCPrice {
+  id        String   @id @default(cuid())
+  price     Int
+  changePct Float    @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("sgc_prices")
+}
+
+// ─── Connections ───────────────────────────────────────────────────────────
+
+model RobloxLink {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  robloxUserId   String   @unique
+  robloxUsername String
+  isVerified     Boolean  @default(false)
+  linkedAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("roblox_links")
+}
+
+// ─── Guild Chat ────────────────────────────────────────────────────────────
+
+model GuildChatMessage {
+  id        String   @id @default(cuid())
+  guildId   String
+  authorId  String
+  content   String   @db.VarChar(400)
+  createdAt DateTime @default(now())
+
+  guild  Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("guild_chat_messages")
+}
+
+// ─── Profile Guestbook ─────────────────────────────────────────────────────
+
+model ProfileMessage {
+  id           String   @id @default(cuid())
+  content      String   @db.VarChar(200)
+  authorId     String
+  targetUserId String
+  createdAt    DateTime @default(now())
+
+  author User @relation("PMAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  target User @relation("PMTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  @@map("profile_messages")
+}
+
+// ─── Shop Inventory ────────────────────────────────────────────────────────
+
+model UserInventory {
+  id          String   @id @default(cuid())
+  userId      String
+  itemId      Int
+  equipped    Boolean  @default(false)
+  purchasedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+  @@map("user_inventories")
+}
+
+// ─── Badges ────────────────────────────────────────────────────────────────
+// 배지 메타데이터(이모지/라벨/설명)는 코드(lib/badges.ts)에 정의하고, 보유 여부만 저장.
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeKey String
+  earnedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeKey])
+  @@map("user_badges")
+}
+
+// ─── Space Notes ───────────────────────────────────────────────────────────
+
+model SpaceNote {
+  id        String   @id @default(cuid())
+  content   String   @db.VarChar(150)
+  authorId  String
+  posX      Float
+  posY      Int
+  createdAt DateTime @default(now())
+
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("space_notes")
+}
+
+// ─── Planet Nodes ──────────────────────────────────────────────────────────
+
+model PlanetNode {
+  id        String   @id @default(cuid())
+  planetId  Int
+  title     String
+  role      String
+  year      String
+  stack     String
+  desc      String   @db.Text
+  url       String?
+  angle     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("planet_nodes")
+}
+
+// ─── Attendance ────────────────────────────────────────────────────────────
+
+model Attendance {
+  id     String   @id @default(cuid())
+  userId String
+  date   DateTime @db.Date
+  points Int      @default(10)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("attendances")
+}

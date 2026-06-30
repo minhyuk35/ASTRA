@@ -1,0 +1,55 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+coverage/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+dist/
+
+# cache
+.turbo/
+.parcel-cache/
+
+# environment variables
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# vercel
+.vercel/
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# local editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# local assistant config
+.claude/
+.understand-anything/
+
+/src/generated/prisma
+.vercel
+.env*
+
+*.txt
