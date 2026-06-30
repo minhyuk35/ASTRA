@@ -1,6 +1,8 @@
 <div align="center">
 
 <img src="public/space-bg.jpg" alt="ASTRA" width="100%" style="border-radius:12px;margin-bottom:16px" />
+![Uploading image.png…]()
+
 
 # ASTRA
 
