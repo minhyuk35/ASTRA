@@ -59,7 +59,7 @@ export default function Navigation({ onReserve }: { onReserve?: () => void }) {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-        className="fixed top-0 left-0 right-0 z-40 flex items-center px-8"
+        className="fixed top-0 left-0 right-0 z-40 flex items-center gap-2 px-4 sm:gap-0 sm:px-8"
         style={{
           paddingTop:    scrolled ? "1.1rem" : "1.6rem",
           paddingBottom: scrolled ? "1.1rem" : "1.2rem",
@@ -71,14 +71,14 @@ export default function Navigation({ onReserve }: { onReserve?: () => void }) {
         }}
       >
         {/* Logo */}
-        <div className="flex-1 flex items-center gap-3">
+        <div className="flex-1 flex items-center gap-2 sm:gap-3">
           <AstraIcon />
-          <span className="text-white text-xs font-light" style={{ letterSpacing: "0.38em" }}>ASTRA</span>
+          <span className="text-white text-[10px] sm:text-xs font-light tracking-[0.22em] sm:tracking-[0.38em]">ASTRA</span>
         </div>
 
         {/* Dot grid — opens menu */}
         <button
-          className="relative opacity-35 hover:opacity-70 transition-opacity duration-500 p-2"
+          className="relative shrink-0 opacity-35 hover:opacity-70 transition-opacity duration-500 p-2"
           aria-label="Menu"
           onClick={() => setMenuOpen(true)}
         >
@@ -105,33 +105,49 @@ export default function Navigation({ onReserve }: { onReserve?: () => void }) {
         </button>
 
         {/* Right side */}
-        <div className="flex-1 flex items-center justify-end gap-3">
-          {status === "authenticated" && (
-            <button
-              onClick={() => signOut({ callbackUrl: "/auth/login" })}
-              className="text-white/35 hover:text-white/75 text-[10px] font-light transition-colors duration-400"
-              style={{ letterSpacing: "0.26em" }}
-            >
-              SIGN OUT
-            </button>
-          )}
+        <div className="flex shrink-0 sm:flex-1 items-center justify-end gap-2 sm:gap-3 whitespace-nowrap">
+          {status === "authenticated" ? (
+            <>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="text-white/35 hover:text-white/75 text-[10px] font-light tracking-[0.12em] sm:tracking-[0.26em] transition-colors duration-400"
+              >
+                SIGN OUT
+              </button>
 
-          <Link
-            href={onReserve ? "#" : "/profile"}
-            onClick={onReserve ? (e) => { e.preventDefault(); onReserve(); } : undefined}
-            className="glass relative flex items-center gap-2.5 px-5 py-2.5 rounded-full group"
-            style={{ transition: "background-color 0.4s ease" }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.09)")}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
-          >
-            <span
-              className="text-white/65 text-xs font-light group-hover:text-white/90"
-              style={{ letterSpacing: "0.2em", transition: "color 0.4s ease" }}
-            >
-              PROFILE
-            </span>
-            <ArrowIcon />
-          </Link>
+              <Link
+                href={onReserve ? "#" : "/profile"}
+                onClick={onReserve ? (e) => { e.preventDefault(); onReserve(); } : undefined}
+                className="glass relative flex items-center gap-2 sm:gap-2.5 px-3 sm:px-5 py-2.5 rounded-full group"
+                style={{ transition: "background-color 0.4s ease" }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.09)")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "")}
+              >
+                <span
+                  className="text-white/65 text-[10px] sm:text-xs font-light group-hover:text-white/90"
+                  style={{ letterSpacing: "0.2em", transition: "color 0.4s ease" }}
+                >
+                  PROFILE
+                </span>
+                <ArrowIcon />
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="rounded-full px-2 sm:px-3 py-2.5 text-white/65 hover:text-white/90 text-xs font-light tracking-wider transition-colors duration-300"
+              >
+                로그인
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="glass rounded-full px-3 sm:px-5 py-2.5 text-white/80 hover:text-white text-xs font-light tracking-wider hover:bg-white/10 transition-colors duration-300"
+              >
+                회원가입
+              </Link>
+            </>
+          )}
         </div>
       </motion.nav>
 

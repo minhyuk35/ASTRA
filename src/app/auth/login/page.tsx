@@ -61,6 +61,14 @@ export default function LoginPage() {
           </svg>
           CONTINUE WITH GOOGLE
         </button>
+
+        <Link
+          href="/"
+          className="mt-5 flex min-h-11 items-center justify-center text-xs font-light text-white/55 transition-colors hover:text-white/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
+          style={{ letterSpacing: "0.06em" }}
+        >
+          로그인 없이 둘러보기
+        </Link>
       </motion.div>
 
       <div

@@ -54,7 +54,10 @@ export default function MenuOverlay({ open, onClose, unread = 0 }: { open: boole
       category: "ACCOUNT",
       items: authed
         ? [{ num: "08", title: "PROFILE", sub: "프로필 설정", href: "/profile" }]
-        : [{ num: "08", title: "SIGN IN", sub: "Enter the platform", href: "/auth/login" }],
+        : [
+            { num: "08", title: "로그인", sub: "SIGN IN", href: "/auth/login" },
+            { num: "09", title: "회원가입", sub: "CREATE ACCOUNT", href: "/auth/signup" },
+          ],
     },
   ];
 
@@ -248,7 +251,7 @@ export default function MenuOverlay({ open, onClose, unread = 0 }: { open: boole
 
           {/* ── Bottom bar ─────────────────────────────────────────── */}
           <div
-            className="shrink-0 px-8 md:px-14 py-5 flex items-center justify-between"
+            className="shrink-0 px-8 md:px-14 py-5 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between"
             style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }}
           >
             <p className="text-white/18 text-[9px] font-light" style={{ letterSpacing: "0.38em" }}>
@@ -256,7 +259,7 @@ export default function MenuOverlay({ open, onClose, unread = 0 }: { open: boole
             </p>
             {authed ? (
               <button
-                onClick={() => { onClose(); signOut({ callbackUrl: "/auth/login" }); }}
+                onClick={() => { onClose(); signOut({ callbackUrl: "/" }); }}
                 className="text-white/30 hover:text-white/70 text-[10px] font-light transition-colors duration-300 flex items-center gap-2"
                 style={{ letterSpacing: "0.28em" }}
               >
@@ -272,7 +275,7 @@ export default function MenuOverlay({ open, onClose, unread = 0 }: { open: boole
                 className="text-white/30 hover:text-white/70 text-[10px] font-light transition-colors duration-300 flex items-center gap-2"
                 style={{ letterSpacing: "0.28em" }}
               >
-                CREATE ACCOUNT
+                회원가입
                 <svg width="8" height="8" viewBox="0 0 10 10" fill="none">
                   <path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>

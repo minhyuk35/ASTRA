@@ -62,6 +62,14 @@ export default function SignupPage() {
           CONTINUE WITH GOOGLE
         </button>
 
+        <Link
+          href="/"
+          className="mt-5 flex min-h-11 items-center justify-center text-xs font-light text-white/55 transition-colors hover:text-white/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-400"
+          style={{ letterSpacing: "0.06em" }}
+        >
+          로그인 없이 둘러보기
+        </Link>
+
         <p className="text-white/15 text-[9px] font-light text-center mt-8" style={{ letterSpacing: "0.12em", lineHeight: 1.8 }}>
           By creating an account you agree to the{" "}
           <Link href="/announcements/1" className="underline underline-offset-2 hover:text-white/35 transition-colors">

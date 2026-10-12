@@ -2,8 +2,6 @@
 
 import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 import { useMouseParallax } from "@/hooks/useMouseParallax";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -28,21 +26,16 @@ const SolarSystem = dynamic(() => import("@/components/SolarSystem"), {
   loading: () => null,
 });
 
-type Stage = "auth" | "loading" | "done";
+type Stage = "loading" | "done";
 
 export default function Page() {
-  const { status } = useSession();
-  const router     = useRouter();
   const mouse         = useMouseParallax();
   const reducedMotion = useReducedMotion();
 
-  const [stage,     setStage]     = useState<Stage>("auth");
+  const [stage,     setStage]     = useState<Stage>("loading");
   const [solarOpen, setSolarOpen] = useState(false);
 
   useEffect(() => {
-    if (status === "loading") return;
-    if (status === "unauthenticated") { router.replace("/auth/login"); return; }
-
     const alreadyLoaded = sessionStorage.getItem("astra_loaded");
     const pendingAuth   = sessionStorage.getItem("pending_auth");
 
@@ -52,7 +45,7 @@ export default function Page() {
       sessionStorage.removeItem("pending_auth");
       setStage("loading");
     }
-  }, [status, router]);
+  }, []);
 
   const handleLoadComplete = useCallback(() => {
     sessionStorage.setItem("astra_loaded", "1");
@@ -80,6 +73,8 @@ export default function Page() {
 
       <SolarSystem open={solarOpen} onClose={handleSolarClose} />
 
+      <Navigation />
+
       <motion.div
         initial={{ opacity: 0, scale: 1.012 }}
         animate={{ opacity: stage === "done" ? 1 : 0, scale: stage === "done" ? 1 : 1.012 }}
@@ -87,7 +82,6 @@ export default function Page() {
         className="relative z-10"
         style={{ willChange: "opacity, transform" }}
       >
-        <Navigation />
         <HeroSection />
         <AboutSection />
         <ExperienceSection />

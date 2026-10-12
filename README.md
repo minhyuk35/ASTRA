@@ -152,6 +152,10 @@ src/
 
 ## 환경 변수
 
+메인 화면과 기본 태양계 콘텐츠는 로그인 없이 둘러볼 수 있습니다. 로그인·회원가입은 상단 버튼에서 선택합니다. DB에 저장된 게시글과 계정 기능은 DB 연결이 필요합니다.
+
+`npm run build`는 DB 스키마를 변경하지 않습니다. 스키마를 반영할 때는 DB 연결을 확인한 뒤 `npm run db:push`를 별도로 실행하세요.
+
 ```env
 DATABASE_URL=          # PostgreSQL 연결 문자열 (Prisma)
 DIRECT_URL=            # Prisma Direct URL (커넥션 풀링 우회)
